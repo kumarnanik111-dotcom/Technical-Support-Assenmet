@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>General Aptitude Recruitment Test</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#182230;background:#f3f6fb}
+*{box-sizing:border-box}body{margin:0;padding:20px}
+.wrap{max-width:850px;margin:0 auto}.hero{background:#173b70;color:white;padding:24px;border-radius:16px 16px 0 0}
+.hero h1{margin:0 0 8px;font-size:clamp(23px,4vw,32px)}.hero p{margin:0;line-height:1.5;color:#e2ebf8}
+.panel{background:white;padding:22px;border:1px solid #dce4ef;border-radius:0 0 16px 16px;box-shadow:0 8px 25px #183b7010}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
+input[type=text],input[type=email]{width:100%;padding:12px;border:1px solid #bac7d8;border-radius:8px;font-size:16px}
+.timerbar{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#eef4fc;border-radius:10px;padding:12px 14px;margin:12px 0 20px;font-weight:700}
+#timer{font-variant-numeric:tabular-nums;color:#a22;font-size:20px}
+.question{border:1px solid #dce4ef;border-radius:12px;padding:16px;margin:14px 0}
+.qtitle{font-weight:700;line-height:1.5;margin-bottom:12px}.option{display:flex;gap:10px;align-items:flex-start;padding:9px;border-radius:8px;cursor:pointer;line-height:1.4}.option:hover{background:#f4f7fb}.option input{margin-top:3px;flex-shrink:0}
+button{border:0;border-radius:9px;padding:13px 18px;font-size:16px;font-weight:700;cursor:pointer}
+.primary{background:#1764c0;color:white}.primary:hover{background:#104e99}.secondary{background:#e8edf5;color:#182230}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.muted{color:#5e6b7d;font-size:14px;line-height:1.5}
+#result{display:none;margin-top:20px;padding:22px;border:2px solid #8bb9ed;background:#f1f7ff;border-radius:12px}
+#result h2{margin-top:0} .score{font-size:28px;font-weight:800;color:#174f91}
+.badge{display:inline-block;padding:5px 9px;border-radius:99px;background:#dcecff;color:#174f91;font-size:13px;font-weight:700}
+footer{text-align:center;color:#667085;font-size:12px;margin:18px}
+@media(max-width:600px){body{padding:10px}.details{grid-template-columns:1fr}.panel{padding:14px}.hero{padding:20px}.timerbar{align-items:flex-start;flex-direction:column}}
+@media print{body{background:white}.hero{border-radius:0}.actions,#timerbar{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>General Aptitude Recruitment Test</h1>
+    <p>30 multiple-choice questions · 30 minutes · One answer per question</p>
+  </header>
+  <main class="panel">
+    <p class="muted">Enter your details before starting. Your score will appear after submission. Please do not refresh the page during the test.</p>
+    <form id="quizForm">
+      <div class="details">
+        <div><label for="candidateName">Full name *</label><input id="candidateName" name="candidateName" type="text" autocomplete="name" required></div>
+        <div><label for="candidateEmail">Email address *</label><input id="candidateEmail" name="candidateEmail" type="email" autocomplete="email" required></div>
+      </div>
+      <div class="timerbar" id="timerbar"><span id="progress">Answered 0 of 30</span><span>Time remaining: <span id="timer">30:00</span></span></div>
+      <div id="questions"></div>
+      <p class="muted">Check your answers before submitting. The test submits automatically when the timer reaches zero.</p>
+      <div class="actions"><button class="primary" type="submit" id="submitBtn">Submit test</button><button class="secondary" type="button" id="clearBtn">Clear answers</button></div>
+    </form>
+    <section id="result" aria-live="polite"></section>
+  </main>
+  <footer>Recruitment assessment · Please answer independently</footer>
+</div>
+<script>
+const questions = [
+ {q:"What is 25% of 240?",o:["40","50","60","80"],a:2},
+ {q:"Find the next number: 3, 6, 12, 24, __.",o:["30","36","48","60"],a:2},
+ {q:"A product costs ₹800 and is discounted by 15%. What is the sale price?",o:["₹680","₹700","₹720","₹740"],a:0},
+ {q:"If 5 workers complete a job in 12 days, how many days would 10 workers take at the same rate?",o:["3 days","6 days","10 days","24 days"],a:1},
+ {q:"Choose the word closest in meaning to “rapid”.",o:["Slow","Quick","Quiet","Weak"],a:1},
+ {q:"A train travels 150 km in 2.5 hours. What is its average speed?",o:["50 km/h","55 km/h","60 km/h","65 km/h"],a:2},
+ {q:"Find the odd one out.",o:["Triangle","Square","Circle","Cube"],a:3},
+ {q:"If CAT is coded as DBU (each letter moves one place forward), DOG is coded as:",o:["EPH","EOG","FPH","DPH"],a:0},
+ {q:"The average of 10, 20, 30 and 40 is:",o:["20","25","30","35"],a:1},
+ {q:"A number is increased from 80 to 100. What is the percentage increase?",o:["20%","25%","30%","125%"],a:1},
+ {q:"If today is Monday, what day will it be 17 days from today?",o:["Tuesday","Wednesday","Thursday","Friday"],a:2},
+ {q:"A bag contains 3 red and 2 blue balls. What is the probability of drawing a blue ball at random?",o:["1/5","2/5","3/5","1/2"],a:1},
+ {q:"Complete the series: 2, 5, 10, 17, 26, __.",o:["35","36","37","38"],a:2},
+ {q:"A shopkeeper buys an item for ₹500 and sells it for ₹600. What is the profit percentage?",o:["10%","15%","20%","25%"],a:2},
+ {q:"Which fraction is the largest?",o:["3/5","5/8","2/3","7/12"],a:2},
+ {q:"If all roses are flowers and some flowers fade quickly, which statement must be true?",o:["All roses fade quickly","Some roses fade quickly","All roses are flowers","No flowers are roses"],a:2},
+ {q:"A father is 3 times as old as his son. Their ages total 48 years. How old is the son?",o:["12","16","18","24"],a:0},
+ {q:"Choose the correctly spelled word.",o:["Accomodation","Accommodation","Acommodation","Accommadation"],a:1},
+ {q:"What is the simple interest on ₹2,000 at 5% per year for 3 years?",o:["₹100","₹200","₹300","₹350"],a:2},
+ {q:"If 4 pencils cost ₹28, how much do 9 pencils cost at the same rate?",o:["₹56","₹63","₹70","₹72"],a:1},
+ {q:"Which number does not belong: 4, 9, 16, 20, 25?",o:["4","9","20","25"],a:2},
+ {q:"A person walks 4 km north and then 3 km east. How far are they from the starting point in a straight line?",o:["5 km","6 km","7 km","8 km"],a:0},
+ {q:"Choose the antonym of “scarce”.",o:["Rare","Limited","Abundant","Small"],a:2},
+ {q:"If 12 machines make 120 items in one hour, how many items do 5 machines make in one hour at the same rate?",o:["40","45","50","60"],a:2},
+ {q:"Find the next letter: A, C, F, J, O, __.",o:["S","T","U","V"],a:2},
+ {q:"A class has 18 boys and 12 girls. What percentage of the class are girls?",o:["30%","35%","40%","45%"],a:2},
+ {q:"If  x + 7 = 19, what is x?",o:["10","11","12","13"],a:2},
+ {q:"A clock shows 3:00. What is the angle between the hour and minute hands?",o:["45°","60°","90°","180°"],a:2},
+ {q:"Which is the smallest value?",o:["0.7","2/3","0.68","69%"],a:1},
+ {q:"A meeting scheduled for 2:35 PM lasts 1 hour 45 minutes. When does it end?",o:["4:10 PM","4:20 PM","4:30 PM","4:35 PM"],a:1}
+];
+const form=document.getElementById('quizForm');
+const questionsEl=document.getElementById('questions');
+const timerEl=document.getElementById('timer');
+const progressEl=document.getElementById('progress');
+const resultEl=document.getElementById('result');
+let seconds=30*60, submitted=false, interval;
+questions.forEach((item,i)=>{
+ const card=document.createElement('fieldset');card.className='question';card.style.minWidth='0';
+ const legend=document.createElement('div');legend.className='qtitle';legend.textContent=`${i+1}. ${item.q}`;card.appendChild(legend);
+ item.o.forEach((option,j)=>{
+  const label=document.createElement('label');label.className='option';
+  const input=document.createElement('input');input.type='radio';input.name=`q${i}`;input.value=j;
+  input.addEventListener('change',updateProgress);
+  const span=document.createElement('span');span.textContent=option;
+  label.append(input,span);card.appendChild(label);
+ });
+ questionsEl.appendChild(card);
+});
+function updateProgress(){const n=questions.filter((_,i)=>form.querySelector(`input[name="q${i}"]:checked`)).length;progressEl.textContent=`Answered ${n} of ${questions.length}`;}
+function formatTime(s){return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
+function tick(){if(submitted)return;seconds--;timerEl.textContent=formatTime(seconds);if(seconds<=0){clearInterval(interval);submitQuiz(true);}}
+interval=setInterval(tick,1000);
+function submitQuiz(auto=false){
+ if(submitted)return;
+ const name=document.getElementById('candidateName').value.trim();
+ const email=document.getElementById('candidateEmail').value.trim();
+ if(!auto && (!name||!email)){form.reportValidity();return;}
+ if(!auto && !confirm('Submit your test now? You cannot change answers afterwards.'))return;
+ submitted=true;clearInterval(interval);
+ let score=0,answered=0;
+ const review=[];
+ questions.forEach((item,i)=>{
+  const selected=form.querySelector(`input[name="q${i}"]:checked`);
+  if(selected)answered++;
+  const correct=selected && Number(selected.value)===item.a;
+  if(correct)score++;
+  review.push({question:i+1,selected:selected?item.o[Number(selected.value)]:"Not answered",correctAnswer:item.o[item.a],correct:!!correct});
+ });
+ form.querySelectorAll('input,button').forEach(el=>el.disabled=true);
+ const percent=Math.round(score/questions.length*100);
+ resultEl.style.display='block';
+ resultEl.innerHTML=`<h2>Test submitted</h2><p>Candidate: <strong>${escapeHtml(name||'Not provided')}</strong></p><p>Email: <strong>${escapeHtml(email||'Not provided')}</strong></p><p class="score">${score} / ${questions.length} (${percent}%)</p><p><span class="badge">${score>=21?'Meets 70% benchmark':'Below 70% benchmark'}</span></p><p>You answered ${answered} of ${questions.length} questions.${auto?' The time limit ended and the test was submitted automatically.':''}</p><h3>Answer review</h3><ol>${review.map(r=>`<li style="margin:10px 0"><strong>${r.correct?'Correct':'Incorrect'}</strong> — Your answer: ${escapeHtml(r.selected)}<br><span class="muted">Correct answer: ${escapeHtml(r.correctAnswer)}</span></li>`).join('')}</ol><p class="muted"><strong>Important:</strong> This standalone demo shows results on the candidate’s device. It does not automatically send or save candidate submissions to you. Use a backend or a connected database to collect results centrally.</p><button class="secondary" type="button" onclick="window.print()">Print / Save result</button>`;
+ resultEl.scrollIntoView({behavior:'smooth'});
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+form.addEventListener('submit',e=>{e.preventDefault();submitQuiz(false);});
+document.getElementById('clearBtn').addEventListener('click',()=>{if(submitted)return;if(confirm('Clear all selected answers?')){form.querySelectorAll('input[type=radio]').forEach(el=>el.checked=false);updateProgress();}});
+</script>
+</body>
+</html>
